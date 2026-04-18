@@ -6,7 +6,7 @@ Solved **Print Paradox (Overlap)** and **String Symphony (Overlap)** by building
 
 Applied the mapping to String Symphony's bitstream, extracting its firmware on the first try and recovering 3 XOR-encrypted flags through static analysis.
 
-**ByteStorm (Overlap)** used a different place-and-route, breaking our mapping. We partially recovered the nibble permutation but couldn't resolve the full bit ordering without a reference binary. The flag was obtained from another team — reportedly via a buffer overflow / memory corruption exploit in the firmware's admin console.
+**ByteStorm (Overlap)** used a different place-and-route, breaking our mapping. We partially recovered the nibble permutation but couldn't resolve the full bit ordering without a reference binary. The flag was obtained from another team — via a stack overflow exploit in the firmware's admin console: `DVS{m@ster_of_st@ck}`.
 
 ---
 

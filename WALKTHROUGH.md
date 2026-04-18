@@ -227,7 +227,7 @@ We attempted:
 - **Intra-nibble bit reordering** (4! per nibble)
 - **Greedy optimization** scoring by ASCII string density
 
-We got the NOP pattern correct (`0x00000013`) and partial string fragments, but couldn't resolve the complete 32-bit permutation without a reference binary. The flag for ByteStorm was reportedly obtainable via a **buffer overflow or memory corruption vulnerability** in the firmware's interactive console — a runtime exploit rather than a static extraction. We got this one from another team at the end of the competition.
+We got the NOP pattern correct (`0x00000013`) and partial string fragments, but couldn't resolve the complete 32-bit permutation without a reference binary. The flag for ByteStorm — `DVS{m@ster_of_st@ck}` — was obtainable via a **stack overflow vulnerability** in the firmware's interactive console, a runtime exploit rather than a static extraction. We got this one from another team at the end of the competition.
 
 ---
 

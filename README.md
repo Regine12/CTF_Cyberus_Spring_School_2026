@@ -62,6 +62,11 @@ Same SoC design, different firmware. Applied the Print Paradox mapping to extrac
 - `DVS{form@t_on$}` (XOR 0x8E)
 - `DVS{Y0U_arE_An_Ov3rLAP_d3t3cToR}` (XOR 0xAC)
 
+### ByteStorm (Overlap)
+Different place-and-route broke the PP-derived mapping. Flag obtained from another team.
+
+**Flag:** `DVS{m@ster_of_st@ck}` (stack overflow exploit)
+
 ## How It Works
 
 1. **FASM Disassembly** — Project X-Ray converts the bitstream into BRAM INIT values
