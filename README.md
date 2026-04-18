@@ -24,6 +24,7 @@ python3 rosetta_extract.py
 ```
 ├── README.md                    # This file
 ├── WALKTHROUGH.md               # Detailed blog-style writeup
+├── GHIDRA_GUIDE.md              # Quick guide to analyzing firmware in Ghidra
 ├── writeup.md                   # Short CTF writeup
 │
 ├── challenges/
@@ -63,9 +64,12 @@ Same SoC design, different firmware. Applied the Print Paradox mapping to extrac
 - `DVS{Y0U_arE_An_Ov3rLAP_d3t3cToR}` (XOR 0xAC)
 
 ### ByteStorm (Overlap)
-Different place-and-route broke the PP-derived mapping. Flag obtained from another team.
+Different place-and-route broke the PP-derived mapping. After normalizing the BRAM start offset to 635 (vs PP's 640), we successfully extracted the firmware and recovered the flag via XOR brute-force.
 
-**Flag:** `DVS{m@ster_of_st@ck}` (stack overflow exploit)
+**Flags found:**
+- `DVS{@dmIniStr4t10N-p@ne1-UNlOcK3d}` (XOR 0x0A — shared with String Symphony)
+- `DVS{st@ck_on$}` (XOR 0x5D — ByteStorm-specific)
+- `DVS{Y0U_arE_An_Ov3rLAP_d3t3cToR}` (XOR 0xAC — shared overlap flag)
 
 ## How It Works
 
@@ -74,7 +78,7 @@ Different place-and-route broke the PP-derived mapping. Flag obtained from anoth
 3. **Extraction** — The mapping is applied to other bitstreams sharing the same P&R
 4. **Flag Recovery** — XOR brute-force (0x00–0xFF) over extracted firmware
 
-See [WALKTHROUGH.md](WALKTHROUGH.md) for the full technical deep-dive.
+See [WALKTHROUGH.md](WALKTHROUGH.md) for the full technical deep-dive, or [GHIDRA_GUIDE.md](GHIDRA_GUIDE.md) for a quick guide to analyzing the extracted firmware in Ghidra.
 
 ## Target Hardware
 

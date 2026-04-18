@@ -6,11 +6,11 @@ Solved **Print Paradox (Overlap)** and **String Symphony (Overlap)** by building
 
 Applied the mapping to String Symphony's bitstream, extracting its firmware on the first try and recovering 3 XOR-encrypted flags through static analysis.
 
-**ByteStorm (Overlap)** used a different place-and-route, breaking our mapping. We partially recovered the nibble permutation but couldn't resolve the full bit ordering without a reference binary. The flag was obtained from another team — via a stack overflow exploit in the firmware's admin console: `DVS{m@ster_of_st@ck}`.
+**ByteStorm (Overlap)** used a different place-and-route, shifting the BRAM data start offset from 640 to 635. After 8 script iterations discovering this offset difference, we successfully extracted the firmware and recovered 3 flags including `DVS{st@ck_on$}` — the stack-related vulnerability flag.
 
 ---
 
-## Flags (5 total)
+## Flags (8 total)
 
 | Challenge | Flag | XOR Key |
 |-----------|------|---------|
@@ -19,6 +19,9 @@ Applied the mapping to String Symphony's bitstream, extracting its firmware on t
 | String Symphony | `DVS{@dmIniStr4t10N-p@ne1-UNlOcK3d}` | 0x0A |
 | String Symphony | `DVS{form@t_on$}` | 0x8E |
 | String Symphony | `DVS{Y0U_arE_An_Ov3rLAP_d3t3cToR}` | 0xAC |
+| ByteStorm | `DVS{@dmIniStr4t10N-p@ne1-UNlOcK3d}` | 0x0A |
+| ByteStorm | `DVS{st@ck_on$}` | 0x5D |
+| ByteStorm | `DVS{Y0U_arE_An_Ov3rLAP_d3t3cToR}` | 0xAC |
 
 ---
 

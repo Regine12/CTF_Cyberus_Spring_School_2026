@@ -222,12 +222,22 @@ ByteStorm used the same FPGA but — critically — a **different place-and-rout
 
 Analysis showed that the same 8 BRAM tiles were present, but they were connected to different firmware bit positions. The tile-to-nibble assignment had been shuffled by the router.
 
-We attempted:
-- **Nibble permutation brute-force** (8! = 40,320 candidates)
-- **Intra-nibble bit reordering** (4! per nibble)
-- **Greedy optimization** scoring by ASCII string density
+We attempted several approaches over 8 script iterations:
+- **v1**: Direct word-level bit permutation search — failed (not a simple permutation)
+- **v2**: Full prjxray extraction + greedy per-bit correlation — found mapping with ~80% correlation but the overlap flag came out garbled (`DVS{X0U_arE_@n_Ot3rLBP_d1t3cWoR}`)
+- **v3**: Swapped bit 0/1 source assignments — marginal improvement
+- **v4**: Used overlap flag (9 words) as crib to refine per-bit mapping — got overlap flag perfect but rest of firmware garbled (too many spurious 9/9 matches from same tile)
+- **v5**: Tile-constrained permutation search (4! per tile group) — worse results
+- **v6**: Exhaustive channel search per bit — found overlap flag but many conflicts
+- **v7**: **Breakthrough** — normalized all BRAM start offsets to **635** (vs PP's 640). The different P&R shifted the data start by 5 positions. With this correction, extraction produced clean firmware with **3 flags**.
+- **v8**: Thorough analysis and fuzzy search to confirm completeness
 
-We got the NOP pattern correct (`0x00000013`) and partial string fragments, but couldn't resolve the complete 32-bit permutation without a reference binary. The flag for ByteStorm — `DVS{m@ster_of_st@ck}` — was obtainable via a **stack overflow vulnerability** in the firmware's interactive console, a runtime exploit rather than a static extraction. We got this one from another team at the end of the competition.
+The key insight: ByteStorm's different P&R didn't just shuffle tiles — it also shifted the BRAM data start offset from 640 to 635. Once all 32 bits used the same start=635, the extraction worked cleanly.
+
+**Flags found:**
+- `DVS{@dmIniStr4t10N-p@ne1-UNlOcK3d}` (XOR 0x0A)
+- `DVS{st@ck_on$}` (XOR 0x5D) — ByteStorm-specific, likely the **stack overflow vulnerability** flag (the challenge name is the hint!)
+- `DVS{Y0U_arE_An_Ov3rLAP_d3t3cToR}` (XOR 0xAC)
 
 ---
 
@@ -240,6 +250,9 @@ We got the NOP pattern correct (`0x00000013`) and partial string fragments, but 
 | 3 | String Symphony | `DVS{@dmIniStr4t10N-p@ne1-UNlOcK3d}` | 0x0A | Static firmware extraction |
 | 4 | String Symphony | `DVS{form@t_on$}` | 0x8E | Static firmware extraction |
 | 5 | String Symphony | `DVS{Y0U_arE_An_Ov3rLAP_d3t3cToR}` | 0xAC | Static firmware extraction |
+| 6 | ByteStorm | `DVS{@dmIniStr4t10N-p@ne1-UNlOcK3d}` | 0x0A | Static firmware extraction (start=635) |
+| 7 | ByteStorm | `DVS{st@ck_on$}` | 0x5D | Static firmware extraction (start=635) |
+| 8 | ByteStorm | `DVS{Y0U_arE_An_Ov3rLAP_d3t3cToR}` | 0xAC | Static firmware extraction (start=635) |
 
 ---
 
@@ -256,6 +269,7 @@ We got the NOP pattern correct (`0x00000013`) and partial string fragments, but 
 3. **Different P&R runs produce different mappings.** ByteStorm showed that re-running place-and-route changes the tile-to-bit assignment, acting as a weak form of obfuscation — but not real security.
 
 ### Tools Used
+- **[Ghidra](https://ghidra-sre.org/)** — RISC-V firmware reverse engineering (see [GHIDRA_GUIDE.md](GHIDRA_GUIDE.md))
 - **[Project X-Ray](https://github.com/f4pga/prjxray)** — Xilinx 7-series bitstream documentation
 - **[FASM](https://github.com/chipsalliance/fasm)** — FPGA Assembly format
 - **numpy** — Vectorized bit-level correlation (turned a potentially hours-long brute force into seconds)
