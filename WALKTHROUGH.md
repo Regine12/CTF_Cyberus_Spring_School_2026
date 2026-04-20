@@ -295,6 +295,17 @@ The `m@ster_of_st@ck` flag name strongly suggests the intended exploitation path
 2. **The BRAM bit ordering is complex but deterministic.** The stride-2 interleaving, the INIT_05 start offset, the Y0/Y1 half assignment — these are all determined by the FPGA architecture and the place-and-route. With the right tooling (prjxray), it's fully reversible.
 3. **Different P&R runs produce different mappings.** ByteStorm showed that re-running place-and-route changes the tile-to-bit assignment, acting as a weak form of obfuscation — but not real security.
 
+### The Intended Approach: JTAG + OpenOCD + GDB
+
+It's worth noting that our bitstream reverse-engineering approach was *not* the intended solution path. Another participant at the competition solved these challenges the "proper" way:
+
+1. Used **OpenOCD** (already configured on the CTF VM) to connect to the FPGA via JTAG
+2. OpenOCD exposed a GDB debug port
+3. Connected with **GDB**, dumped the program memory at runtime
+4. Decrypted the flags from the memory dump
+
+This is the standard approach for embedded firmware extraction when you have physical/debug access — and it's significantly simpler. Our approach of extracting firmware purely from the `.bit` file (without ever powering on the FPGA) was the hard way around, but it has the advantage of working offline, without hardware access, and scales to any bitstream you can get your hands on.
+
 ### Tools Used
 - **[Ghidra](https://ghidra-sre.org/)** — RISC-V firmware reverse engineering (see [GHIDRA_GUIDE.md](GHIDRA_GUIDE.md))
 - **[Project X-Ray](https://github.com/f4pga/prjxray)** — Xilinx 7-series bitstream documentation
@@ -304,4 +315,4 @@ The `m@ster_of_st@ck` flag name strongly suggests the intended exploitation path
 
 ---
 
-*Written after CTF Cyberus. Thanks to the organizers for creative challenges and to the other teams for the ByteStorm flag. The full extraction script (`rosetta_extract.py`) and challenge files are in this repository.*
+*Written after CTF Cyberus. Thanks to the organizers for creative challenges. The full extraction script (`rosetta_extract.py`) and challenge files are in this repository.*
