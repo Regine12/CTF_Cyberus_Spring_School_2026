@@ -95,6 +95,13 @@ Find the `strcmp`-like function and cross-reference it to map all commands.
 - Look for fixed-size stack buffers with unbounded input (e.g., `gets()` or `scanf("%s", buf)`)
 - The admin console likely has a command that reads input into a small buffer without length checking
 
+### Code Catastrophe — `DVS{m@ster_of_st@ck}`
+- XOR key: `0xAF`
+- Another **stack overflow** challenge — same vulnerability class as ByteStorm
+- The firmware is provided directly (`firmware.bin`), so load it straight into Ghidra
+- Look for recursive functions or deeply nested calls that could overflow the stack
+- The "catastrophe" in the name may hint at a more dramatic stack smash than ByteStorm's
+
 ## 7. Useful Ghidra Shortcuts
 
 | Shortcut | Action |

@@ -1,8 +1,8 @@
 # Extracting Firmware from FPGA Bitstreams: A CTF Walkthrough
 
-**CTF Cyberus — "Print Paradox" & "String Symphony" Challenges**
+**CTF Cyberus — Software Challenges**
 
-> These two challenges were the most interesting ones at CTF Cyberus for me. They involved extracting firmware from Xilinx FPGA bitstreams — no JTAG, no debug port, just raw `.bit` files and reverse engineering. There were other challenges in the competition too, but I wanted to write this up as a detailed walkthrough because the technique we developed here is reusable and, frankly, I haven't seen it documented elsewhere.
+> The Software challenges at CTF Cyberus were the most interesting ones for me. They all involved extracting firmware from Xilinx FPGA bitstreams — no JTAG, no debug port, just raw `.bit` files and reverse engineering. I wanted to write this up as a detailed walkthrough because the technique we developed here is reusable and, frankly, I haven't seen it documented elsewhere.
 >
 > If you want to follow along, the challenge files are in this repo. You'll need Python 3, numpy, and the [Project X-Ray](https://github.com/f4pga/prjxray) toolchain.
 
@@ -20,9 +20,10 @@
 4. [String Symphony: Applying the Mapping](#string-symphony-applying-the-mapping)
    - [The Lock Admin Panel](#the-lock-admin-panel)
    - [Finding the Hidden Flags](#finding-the-hidden-flags)
-5. [ByteStorm: Where We Got Stuck](#bytestorm-where-we-got-stuck)
-6. [Flags Summary](#flags-summary)
-7. [Key Takeaways](#key-takeaways)
+5. [ByteStorm: Cracking a Different P&R](#bytestorm-cracking-a-different-pr)
+6. [Code Catastrophe: The Easy Win](#code-catastrophe-the-easy-win)
+7. [Flags Summary](#flags-summary)
+8. [Key Takeaways](#key-takeaways)
 
 ---
 
@@ -216,7 +217,7 @@ The `form@t_on$` flag name strongly suggests the intended exploitation path invo
 
 ---
 
-## ByteStorm: Where We Got Stuck
+## ByteStorm: Cracking a Different P&R
 
 ByteStorm used the same FPGA but — critically — a **different place-and-route**. When we applied the PP-derived BRAM mapping to the ByteStorm bitstream, the extracted firmware was scrambled: word 1 came out as `0x01000003` instead of the expected NOP `0x00000013`.
 
@@ -241,18 +242,44 @@ The key insight: ByteStorm's different P&R didn't just shuffle tiles — it also
 
 ---
 
+## Code Catastrophe: The Easy Win
+
+Code Catastrophe — like Print Paradox — provided both `board.bit` and `firmware.bin`. This meant we didn't need any BRAM correlation at all: just XOR brute-force the provided firmware binary directly.
+
+```python
+data = open('firmware.bin', 'rb').read()
+for xor_key in range(256):
+    xored = bytes(b ^ xor_key for b in data)
+    if b'DVS{' in xored:
+        # Extract the flag
+```
+
+The firmware (17,176 bytes) contained the same "Secure Lock Administration Panel" as the other challenges, with the same JTAG challenge, memory dump commands, and ASCII art banner.
+
+**Flags found:**
+- `DVS{@dmIniStr4t10N-p@ne1-UNlOcK3d}` (XOR 0x0A) — shared admin panel flag
+- `DVS{m@ster_of_st@ck}` (XOR 0xAF) — Code Catastrophe-specific, hinting at a **stack overflow vulnerability**
+- `DVS{Y0U_arE_An_Ov3rLAP_d3t3cToR}` (XOR 0xAC) — shared overlap flag
+
+The `m@ster_of_st@ck` flag name strongly suggests the intended exploitation path involved a **stack-based buffer overflow** in the admin console — likely an unbounded read into a fixed-size stack buffer. See [GHIDRA_GUIDE.md](GHIDRA_GUIDE.md) for tips on finding this in Ghidra.
+
+---
+
 ## Flags Summary
 
 | # | Challenge | Flag | XOR Key | Method |
 |---|-----------|------|---------|--------|
-| 1 | Print Paradox | `DVS{m@ster_of_printf}` | 0x65 | Static firmware extraction |
-| 2 | Print Paradox | `DVS{Y0U_arE_An_Ov3rLAP_d3t3cToR}` | 0xAC | Static firmware extraction |
-| 3 | String Symphony | `DVS{@dmIniStr4t10N-p@ne1-UNlOcK3d}` | 0x0A | Static firmware extraction |
-| 4 | String Symphony | `DVS{form@t_on$}` | 0x8E | Static firmware extraction |
-| 5 | String Symphony | `DVS{Y0U_arE_An_Ov3rLAP_d3t3cToR}` | 0xAC | Static firmware extraction |
-| 6 | ByteStorm | `DVS{@dmIniStr4t10N-p@ne1-UNlOcK3d}` | 0x0A | Static firmware extraction (start=635) |
-| 7 | ByteStorm | `DVS{st@ck_on$}` | 0x5D | Static firmware extraction (start=635) |
-| 8 | ByteStorm | `DVS{Y0U_arE_An_Ov3rLAP_d3t3cToR}` | 0xAC | Static firmware extraction (start=635) |
+| 1 | Print Paradox | `DVS{m@ster_of_printf}` | 0x65 | Direct firmware XOR |
+| 2 | Print Paradox | `DVS{Y0U_arE_An_Ov3rLAP_d3t3cToR}` | 0xAC | Direct firmware XOR |
+| 3 | String Symphony | `DVS{@dmIniStr4t10N-p@ne1-UNlOcK3d}` | 0x0A | BRAM extraction + XOR |
+| 4 | String Symphony | `DVS{form@t_on$}` | 0x8E | BRAM extraction + XOR |
+| 5 | String Symphony | `DVS{Y0U_arE_An_Ov3rLAP_d3t3cToR}` | 0xAC | BRAM extraction + XOR |
+| 6 | ByteStorm | `DVS{@dmIniStr4t10N-p@ne1-UNlOcK3d}` | 0x0A | BRAM extraction (start=635) + XOR |
+| 7 | ByteStorm | `DVS{st@ck_on$}` | 0x5D | BRAM extraction (start=635) + XOR |
+| 8 | ByteStorm | `DVS{Y0U_arE_An_Ov3rLAP_d3t3cToR}` | 0xAC | BRAM extraction (start=635) + XOR |
+| 9 | Code Catastrophe | `DVS{@dmIniStr4t10N-p@ne1-UNlOcK3d}` | 0x0A | Direct firmware XOR |
+| 10 | Code Catastrophe | `DVS{m@ster_of_st@ck}` | 0xAF | Direct firmware XOR |
+| 11 | Code Catastrophe | `DVS{Y0U_arE_An_Ov3rLAP_d3t3cToR}` | 0xAC | Direct firmware XOR |
 
 ---
 

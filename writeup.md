@@ -1,16 +1,16 @@
-# CTF Cyberus — FPGA Challenges Writeup (Short)
+# CTF Cyberus — Software Challenges Writeup (Short)
 
 ## Overall Achievement
 
-Solved **Print Paradox (Overlap)** and **String Symphony (Overlap)** by building an FPGA firmware extraction pipeline from scratch. Developed a "Rosetta Stone" correlation technique: using a known firmware binary as ground truth, we reverse-engineered the Xilinx 7-series BRAM bit mapping via prjxray FASM disassembly + numpy vectorized correlation, achieving **100% byte-accurate firmware extraction** (17,264/17,264 bytes).
+Solved all 4 Software category challenges: **Print Paradox**, **String Symphony**, **ByteStorm**, and **Code Catastrophe** (all "Overlap" variants). Built an FPGA firmware extraction pipeline from scratch using a "Rosetta Stone" correlation technique: using known firmware binaries as ground truth, we reverse-engineered the Xilinx 7-series BRAM bit mapping via prjxray FASM disassembly + numpy vectorized correlation, achieving **100% byte-accurate firmware extraction**.
 
-Applied the mapping to String Symphony's bitstream, extracting its firmware on the first try and recovering 3 XOR-encrypted flags through static analysis.
-
-**ByteStorm (Overlap)** used a different place-and-route, shifting the BRAM data start offset from 640 to 635. After 8 script iterations discovering this offset difference, we successfully extracted the firmware and recovered 3 flags including `DVS{st@ck_on$}` — the stack-related vulnerability flag.
+- **Print Paradox** & **Code Catastrophe** — provided firmware.bin, flags extracted directly via XOR brute-force
+- **String Symphony** — applied PP-derived BRAM mapping, extracted firmware on first try
+- **ByteStorm** — different P&R required discovering a shifted BRAM start offset (635 vs 640)
 
 ---
 
-## Flags (8 total)
+## Flags (11 total, 6 unique)
 
 | Challenge | Flag | XOR Key |
 |-----------|------|---------|
@@ -22,6 +22,9 @@ Applied the mapping to String Symphony's bitstream, extracting its firmware on t
 | ByteStorm | `DVS{@dmIniStr4t10N-p@ne1-UNlOcK3d}` | 0x0A |
 | ByteStorm | `DVS{st@ck_on$}` | 0x5D |
 | ByteStorm | `DVS{Y0U_arE_An_Ov3rLAP_d3t3cToR}` | 0xAC |
+| Code Catastrophe | `DVS{@dmIniStr4t10N-p@ne1-UNlOcK3d}` | 0x0A |
+| Code Catastrophe | `DVS{m@ster_of_st@ck}` | 0xAF |
+| Code Catastrophe | `DVS{Y0U_arE_An_Ov3rLAP_d3t3cToR}` | 0xAC |
 
 ---
 

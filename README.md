@@ -1,8 +1,8 @@
-# FPGA Firmware Extraction — CTF Cyberus Walkthrough
+# Software Challenges — CTF Cyberus Walkthrough
 
 > Extracting firmware from Xilinx 7-series FPGA bitstreams using bit-level correlation.
 
-This repository contains the challenge files and solution for **Print Paradox (Overlap)** and **String Symphony (Overlap)** from CTF Cyberus — two FPGA reverse-engineering challenges where the goal was to extract hidden flags from firmware embedded inside Xilinx bitstreams.
+This repository contains the challenge files and solutions for the **Software** category challenges from CTF Cyberus — FPGA reverse-engineering challenges where the goal was to extract hidden flags from firmware embedded inside Xilinx bitstreams.
 
 ## Quick Start
 
@@ -34,10 +34,21 @@ python3 rosetta_extract.py
 │   │   ├── firmware.bin         # Known firmware (Rosetta Stone)
 │   │   └── software/            # SDK headers (CSR, memory map, linker)
 │   │
-│   └── string-symphony/         # String Symphony (Overlap) — firmware unknown
-│       ├── board.bit            # FPGA bitstream
-│       ├── board.v              # Partial Verilog source
-│       └── software/            # SDK headers
+│   ├── string-symphony/         # String Symphony (Overlap) — firmware unknown
+│   │   ├── board.bit            # FPGA bitstream
+│   │   ├── board.v              # Partial Verilog source
+│   │   └── software/            # SDK headers
+│   │
+│   ├── bytestorm/               # ByteStorm (Overlap) — different P&R
+│   │   ├── board.bit
+│   │   ├── board.v
+│   │   └── software/
+│   │
+│   └── code-catastrophe/        # Code Catastrophe (Overlap) — has known firmware
+│       ├── board.bit
+│       ├── board.v
+│       ├── firmware.bin          # Known firmware (direct flag extraction)
+│       └── software/
 │
 ├── scripts/
 │   └── rosetta_extract.py       # Main extraction script
@@ -69,6 +80,14 @@ Different place-and-route broke the PP-derived mapping. After normalizing the BR
 **Flags found:**
 - `DVS{@dmIniStr4t10N-p@ne1-UNlOcK3d}` (XOR 0x0A — shared with String Symphony)
 - `DVS{st@ck_on$}` (XOR 0x5D — ByteStorm-specific)
+- `DVS{Y0U_arE_An_Ov3rLAP_d3t3cToR}` (XOR 0xAC — shared overlap flag)
+
+### Code Catastrophe (Overlap)
+Like Print Paradox, this challenge provides the firmware binary — so flags can be extracted directly via XOR brute-force without needing BRAM correlation. The flag name hints at a **stack overflow vulnerability** in the firmware's admin console.
+
+**Flags found:**
+- `DVS{@dmIniStr4t10N-p@ne1-UNlOcK3d}` (XOR 0x0A — shared admin panel flag)
+- `DVS{m@ster_of_st@ck}` (XOR 0xAF — Code Catastrophe-specific)
 - `DVS{Y0U_arE_An_Ov3rLAP_d3t3cToR}` (XOR 0xAC — shared overlap flag)
 
 ## How It Works
